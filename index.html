@@ -5,29 +5,455 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>V-day</title>
   <style>
-    body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,Arial;background:#ffd1dc}
-    .card{background:#fff;padding:28px 26px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.12);text-align:center;max-width:520px}
-    h1{margin:0 0 10px;font-size:34px}
-    p{margin:0;color:#444;font-size:16px}
-    .btns{margin-top:18px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-    a{padding:10px 16px;border-radius:12px;text-decoration:none;border:1px solid #ddd;color:#111;background:#fff}
-    a.primary{background:#111;color:#fff;border-color:#111}
+    :root{
+      --bg1:#ffd6e7;
+      --bg2:#ff9fc5;
+      --card:#ffffffcc;
+      --text:#1a1a1a;
+      --yes:#2eaa4f;
+      --no:#e04b3c;
+      --shadow: 0 18px 45px rgba(0,0,0,.18);
+      --radius: 24px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      background: radial-gradient(1200px 700px at 50% 25%, #fff 0%, var(--bg1) 35%, var(--bg2) 100%);
+      overflow-x:hidden;
+    }
+
+    .wrap{
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:18px;
+    }
+
+    .card{
+      width:min(720px, 100%);
+      background:var(--card);
+      backdrop-filter: blur(10px);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:22px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+    }
+
+    .badge{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#ffffffaa;
+      border:1px solid #ffffffaa;
+    }
+
+    h1{
+      margin:10px 0 6px;
+      font-size: clamp(26px, 4.6vw, 44px);
+      line-height:1.1;
+      text-align:center;
+      letter-spacing:.2px;
+    }
+
+    .sub{
+      margin:0;
+      text-align:center;
+      font-size: clamp(14px, 2.3vw, 16px);
+      opacity:.85;
+    }
+
+    .stage{
+      margin-top:18px;
+      display:grid;
+      gap:14px;
+      place-items:center;
+      padding:14px 12px 6px;
+      position:relative;
+      min-height: 220px;
+    }
+
+    .img{
+      width:min(220px, 60vw);
+      aspect-ratio:1/1;
+      border-radius: 22px;
+      background:#fff;
+      box-shadow: 0 12px 30px rgba(0,0,0,.12);
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+    }
+    .img img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .btnRow{
+      width:100%;
+      display:flex;
+      gap:14px;
+      justify-content:center;
+      flex-wrap:wrap;
+      padding:10px 0 4px;
+      position:relative;
+    }
+
+    button{
+      border:0;
+      cursor:pointer;
+      border-radius: 18px;
+      padding: 16px 22px;
+      font-weight:800;
+      font-size: clamp(16px, 3vw, 22px);
+      box-shadow: 0 14px 26px rgba(0,0,0,.18);
+      transition: transform .12s ease, filter .12s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+      min-width: min(220px, 78vw);
+    }
+    button:active{ transform: scale(.98); }
+
+    #yesBtn{
+      background:var(--yes);
+      color:#fff;
+    }
+    #noBtn{
+      background:var(--no);
+      color:#fff;
+      position: relative;
+    }
+
+    /* On larger screens, keep buttons a bit tighter */
+    @media (min-width: 560px){
+      button{ min-width: 220px; }
+      .stage{ min-height: 260px; }
+    }
+
+    .audioBar{
+      margin-top:12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+
+    .miniBtn{
+      font-size:13px;
+      font-weight:700;
+      padding:10px 12px;
+      border-radius:999px;
+      background:#111;
+      color:#fff;
+      box-shadow:none;
+      min-width:auto;
+    }
+
+    .hint{
+      font-size:12px;
+      opacity:.75;
+      text-align:center;
+      max-width: 58ch;
+    }
+
+    /* Confetti */
+    .confetti{
+      position:absolute;
+      inset:-40px;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .confetti span{
+      position:absolute;
+      width:10px; height:16px;
+      border-radius:3px;
+      opacity:.9;
+      transform: translateY(-40px) rotate(0deg);
+      animation: fall linear forwards;
+    }
+    @keyframes fall{
+      to { transform: translateY(110vh) rotate(720deg); opacity:1; }
+    }
+
+    /* Finale screen */
+    .finale{
+      display:none;
+      text-align:center;
+      padding:26px 12px 10px;
+    }
+    .finale h2{
+      margin:6px 0 6px;
+      font-size: clamp(22px, 4.2vw, 34px);
+    }
+    .finale p{
+      margin:0;
+      opacity:.85;
+      font-size: clamp(14px, 2.2vw, 16px);
+    }
+
+    .footerNote{
+      margin-top:10px;
+      text-align:center;
+      font-size:12px;
+      opacity:.7;
+    }
+
+    /* Optional embedded player area */
+    .embedWrap{
+      width:100%;
+      display:none;
+      margin-top:10px;
+    }
+    .embedWrap iframe{
+      width: min(560px, 100%);
+      height: 120px;
+      border:0;
+      border-radius:16px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.14);
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1 id="q">Will you be my Valentine? ❤️</h1>
-    <p id="sub">A tiny website, a big question 🙂</p>
-    <div class="btns">
-      <a class="primary" href="#" onclick="alert('Yay! 🎉'); return false;">Yes</a>
-      <a href="#" onclick="alert('Okay 😄'); return false;">No</a>
+  <div class="wrap">
+    <div class="card" id="card">
+      <div class="top">
+        <div class="badge">💘 Deployed on GitHub Pages</div>
+        <div class="badge" id="counter">No attempts: 0</div>
+      </div>
+
+      <div id="main">
+        <h1 id="title">Will you be my Valentine? 💖</h1>
+        <p class="sub" id="subtitle">A tiny website, a big question 🙂</p>
+
+        <div class="stage" id="stage">
+          <div class="img" id="imgBox" aria-hidden="true">
+            <!-- Put your own image/gif file in the repo and update the src if you want -->
+            <img id="moodImg" src="https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif" alt="Cute gif" />
+          </div>
+
+          <div class="btnRow" id="btnRow">
+            <button id="yesBtn">Yes ✅</button>
+            <button id="noBtn">No 😤</button>
+          </div>
+        </div>
+
+        <div class="audioBar">
+          <button class="miniBtn" id="musicBtn">▶️ Play music</button>
+          <button class="miniBtn" id="muteBtn" style="display:none;">🔇 Mute</button>
+        </div>
+        <div class="hint" id="musicHint">
+          Music tip: upload <b>music.mp3</b> to this repo (same folder as index.html) OR paste an embed link in the code (instructions below).
+        </div>
+
+        <!-- Local audio (recommended if you have rights) -->
+        <audio id="audio" preload="auto" loop>
+          <!-- Put a file named music.mp3 in the repo root -->
+          <source src="music.mp3" type="audio/mpeg" />
+        </audio>
+
+        <!-- Optional embed player (YouTube/Spotify). Hidden by default. -->
+        <div class="embedWrap" id="embedWrap">
+          <!-- Example: paste a Spotify embed or YouTube embed iframe here -->
+          <!-- <iframe src="PASTE_EMBED_URL_HERE" allow="autoplay; encrypted-media" loading="lazy"></iframe> -->
+        </div>
+
+        <div class="footerNote">
+          Works best on mobile too — try clicking “No” a few times 😄
+        </div>
+      </div>
+
+      <div class="finale" id="finale">
+        <h2 id="finalTitle">Knew you would say yes! 🎉</h2>
+        <p id="finalText">You just made me the happiest person 💞</p>
+        <div style="margin-top:14px">
+          <button class="miniBtn" onclick="location.reload()">🔁 Replay</button>
+        </div>
+      </div>
+
+      <div class="confetti" id="confetti"></div>
     </div>
   </div>
 
   <script>
+    // --- Personalization from URL: ?name=Vijay%20Pattar
     const params = new URLSearchParams(location.search);
     const name = params.get("name");
-    if (name) document.getElementById("q").textContent = `${name}, will you be my Valentine? ❤️`;
+
+    const titleEl = document.getElementById("title");
+    if (name) titleEl.textContent = `${name}, will you be my Valentine? 💖`;
+
+    // --- Funny "No" progression
+    const noBtn = document.getElementById("noBtn");
+    const yesBtn = document.getElementById("yesBtn");
+    const counter = document.getElementById("counter");
+    const subtitle = document.getElementById("subtitle");
+    const moodImg = document.getElementById("moodImg");
+
+    let noCount = 0;
+
+    const noTexts = [
+      "No 😤",
+      "Are you sure? 🤨",
+      "Think again… 😅",
+      "Pookie please… 🥺",
+      "Last chance… 😳",
+      "I will be really sad… 😢",
+      "My laptop will cry… 💻😭",
+      "Okay, I’m begging now… 🙏",
+      "Don’t do this to me… 😭",
+      "Fine… but why? 🥲"
+    ];
+
+    const moodGifs = [
+      "https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif",
+      "https://media.giphy.com/media/l2JHRhAtnJSDNJ2py/giphy.gif",
+      "https://media.giphy.com/media/5GoVLqeAOo6PK/giphy.gif",
+      "https://media.giphy.com/media/9Y5BbDSkSTiY8/giphy.gif",
+      "https://media.giphy.com/media/3oriO0OEd9QIDdllqo/giphy.gif",
+    ];
+
+    function rand(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+    function moveNoButton(){
+      // Move within the card area (mobile-friendly)
+      const card = document.getElementById("card");
+      const rect = card.getBoundingClientRect();
+      const btnRect = noBtn.getBoundingClientRect();
+
+      const pad = 12;
+      const maxX = rect.width - btnRect.width - pad;
+      const maxY = rect.height - btnRect.height - 160; // keep it near center, avoid top badges
+
+      const x = rand(pad, Math.max(pad, maxX));
+      const y = rand(120, Math.max(120, maxY));
+
+      noBtn.style.position = "absolute";
+      noBtn.style.left = x + "px";
+      noBtn.style.top = y + "px";
+    }
+
+    noBtn.addEventListener("click", () => {
+      noCount++;
+      counter.textContent = `No attempts: ${noCount}`;
+
+      // update text
+      noBtn.textContent = noTexts[Math.min(noCount, noTexts.length - 1)];
+
+      // make "Yes" grow a bit (subtle persuasion)
+      const grow = Math.min(1.0 + noCount * 0.05, 1.45);
+      yesBtn.style.transform = `scale(${grow})`;
+
+      // change subtitle for extra comedy
+      const subs = [
+        "Okay… I respect choices. (But also… no) 😄",
+        "This is getting personal now 😤",
+        "I’m going to file a bug report on your ‘No’ button 🧪",
+        "My confidence: still high. Your ‘No’: suspicious. 🤔",
+        "We can settle this over coffee ☕ (yes?)"
+      ];
+      subtitle.textContent = subs[noCount % subs.length];
+
+      // swap gifs occasionally
+      if (noCount % 2 === 0) {
+        moodImg.src = moodGifs[noCount % moodGifs.length];
+      }
+
+      // Make the no button run away after the first click
+      moveNoButton();
+
+      // After enough no's, disable "No" gently and make it silly
+      if (noCount >= 10) {
+        noBtn.textContent = "No is on vacation 🏖️";
+        noBtn.disabled = true;
+        noBtn.style.filter = "grayscale(0.2) brightness(0.95)";
+        subtitle.textContent = "Plot twist: only ‘Yes’ is available now 😌";
+      }
+    });
+
+    // On hover (desktop), it escapes too
+    noBtn.addEventListener("mouseenter", () => {
+      if (noCount >= 1 && noCount < 10) moveNoButton();
+    });
+
+    // --- Yes flow with confetti + finale
+    const confetti = document.getElementById("confetti");
+    const main = document.getElementById("main");
+    const finale = document.getElementById("finale");
+    const finalTitle = document.getElementById("finalTitle");
+    const finalText = document.getElementById("finalText");
+
+    function launchConfetti(){
+      confetti.innerHTML = "";
+      const pieces = 80;
+      for (let i=0;i<pieces;i++){
+        const s = document.createElement("span");
+        s.style.left = rand(0, 100) + "vw";
+        s.style.top = rand(-20, 10) + "vh";
+        s.style.animationDuration = (Math.random()*1.6 + 1.2).toFixed(2) + "s";
+        s.style.animationDelay = (Math.random()*0.2).toFixed(2) + "s";
+        // random color
+        const colors = ["#ff5fa2","#ffd166","#06d6a0","#118ab2","#ef476f","#8338ec"];
+        s.style.background = colors[rand(0, colors.length-1)];
+        confetti.appendChild(s);
+      }
+    }
+
+    yesBtn.addEventListener("click", () => {
+      launchConfetti();
+
+      const who = name ? name : "You";
+      finalTitle.textContent = `Knew you would say yes, ${who}! 🎉`;
+      finalText.textContent = "You just made me the happiest person 💞";
+
+      main.style.display = "none";
+      finale.style.display = "block";
+    });
+
+    // --- Music controls (autoplay is usually blocked; user taps Play)
+    const audio = document.getElementById("audio");
+    const musicBtn = document.getElementById("musicBtn");
+    const muteBtn = document.getElementById("muteBtn");
+    const musicHint = document.getElementById("musicHint");
+
+    let playing = false;
+
+    musicBtn.addEventListener("click", async () => {
+      try {
+        if (!playing) {
+          await audio.play(); // will work if music.mp3 exists, otherwise it may fail silently
+          playing = true;
+          musicBtn.textContent = "⏸️ Pause music";
+          muteBtn.style.display = "inline-block";
+          musicHint.textContent = "Music is playing 🎶 (If you don’t hear it, add music.mp3 or use an embed.)";
+        } else {
+          audio.pause();
+          playing = false;
+          musicBtn.textContent = "▶️ Play music";
+        }
+      } catch (e) {
+        // If no mp3 exists or browser blocks, guide user
+        musicHint.textContent = "Couldn’t play music. Add a file named music.mp3 to the repo OR use an embed iframe.";
+      }
+    });
+
+    muteBtn.addEventListener("click", () => {
+      audio.muted = !audio.muted;
+      muteBtn.textContent = audio.muted ? "🔊 Unmute" : "🔇 Mute";
+    });
   </script>
 </body>
 </html>
