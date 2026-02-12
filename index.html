@@ -166,7 +166,19 @@
 
     yesBtn.addEventListener("click", () => {
       moodGif.src = gifs.yes;
-      document.getElementById("question").textContent = "Yay! 😍";
+    
+      document.getElementById("question").innerHTML = `
+        Knew you would say yes! 🎉<br><br>
+        <span style="font-size:20px; font-weight:600;">
+          You just made me the happiest person! 💞
+        </span><br><br>
+        <span style="font-size:16px; opacity:0.8;">
+          I will notify Vijay about it, Thanks :)
+        </span>
+      `;
+    
+      yesBtn.disabled = true;
+      noBtn.disabled = true;
       // Optional: disable buttons after yes
       yesBtn.disabled = true;
       noBtn.disabled = true;
